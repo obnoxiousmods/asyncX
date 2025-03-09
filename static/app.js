@@ -15,7 +15,9 @@ document.getElementById("startButton").addEventListener("click", function() {
     // ✅ Store the username for the download filename
     downloadButton.dataset.username = username;
 
-    const ws = new WebSocket("ws://localhost:8000/ws");
+    const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+    const ws = new WebSocket(`${wsProtocol}${window.location.host}/ws`);
+    
 
     ws.onopen = () => {
         console.log("Connected to WebSocket");
