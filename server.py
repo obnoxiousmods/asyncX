@@ -2,6 +2,7 @@ import random
 
 import anyio
 import uvicorn
+import json5
 from colorama import Fore, init
 from motor.motor_asyncio import AsyncIOMotorClient
 from starlette.applications import Starlette
@@ -18,13 +19,14 @@ init(autoreset=True)  # Enable colored console output
 
 # ✅ Set up Starlette app & templates
 app = Starlette()
+config = json5.load(open("config.json5"))
 templates = Jinja2Templates(directory="templates")
 
 # ✅ Serve static files (CSS, JS)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ✅ MongoDB Setup
-MONGO_URI = "mongodb://localhost:27017"
+MONGO_URI = config.get("mongo", "mongodb://localhost:27017")
 mongo_client = AsyncIOMotorClient(MONGO_URI)
 db = mongo_client["followers"]
 accounts_collection = db["accounts"]
