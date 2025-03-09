@@ -4,7 +4,7 @@ import anyio
 from typing import Dict, Any, List, Tuple
 from colorama import Fore
 from asyncX.constants import DEFAULT_HEADERS, Operation  # ✅ Import Operation
-from asyncX.utils import build_params, find_rest_ids, get_cursor  # ✅ Import utility functions
+from asyncX.utils import build_params, find_rest_ids, get_cursor, find_key  # ✅ Import utility functions
 from typing import AsyncGenerator
 
 class AsyncX:
@@ -60,28 +60,28 @@ class AsyncX:
         while True:
             try:
                 response = await self.session.get(url, params=encoded_params)
-                response.raise_for_status()
 
                 # ✅ Extract & Store Rate Limits Per Operation
                 limit = int(response.headers.get("x-rate-limit-limit", -1))
                 remaining = int(response.headers.get("x-rate-limit-remaining", -1))
                 reset_time = int(response.headers.get("x-rate-limit-reset", time.time()))
-
+                
                 self.rate_limits[name] = (remaining, reset_time)  # ✅ Store per operation
-
+                
                 print(
                     Fore.YELLOW
                     + f"📊 {name} Rate Limit: {remaining}/{limit} | Reset at {time.strftime('%H:%M:%S', time.localtime(reset_time))}"
                 )
-
+                
+                response.raise_for_status()
                 return response.json()
 
             except httpx.HTTPStatusError as e:
                 print(Fore.RED + f"[Error] HTTP {e.response.status_code}: {e.response.text}")
-                break
+                return False
             except Exception as e:
                 print(Fore.RED + f"[Error] Request failed: {e}")
-                break
+                return False
 
 
     async def get_user_by_screen_name(self, screen_name: str) -> Dict[str, Any]:
@@ -132,26 +132,28 @@ class AsyncX:
 
             try:
                 response = await self.session.get(url, params=encoded_params)
-                response.raise_for_status()
-
+                
                 # ✅ Extract & Store Rate Limits Per Operation
                 limit = int(response.headers.get("x-rate-limit-limit", -1))
                 remaining = int(response.headers.get("x-rate-limit-remaining", -1))
                 reset_time = int(response.headers.get("x-rate-limit-reset", time.time()))
+                stringTime = time.strftime('%H:%M:%S', time.localtime(reset_time))
 
                 self.rate_limits[name] = (remaining, reset_time)  # ✅ Store per operation
 
                 print(
                     Fore.YELLOW
-                    + f"📊 {name} Rate Limit: {remaining}/{limit} | Reset at {time.strftime('%H:%M:%S', time.localtime(reset_time))}"
+                    + f"📊 {name} Rate Limit: {remaining}/{limit} | Reset at {stringTime}"
                 )
+                
+                response.raise_for_status()
 
                 data = response.json()
-                batch_ids = find_rest_ids(data)
-                yield batch_ids
+                screen_names = find_key(data, 'screen_name')
+                yield screen_names
 
                 prev_len = len(ids)
-                ids |= set(batch_ids)
+                ids |= set(screen_names)
                 cursor = get_cursor(data)
 
                 if not cursor or prev_len == len(ids):
@@ -161,6 +163,8 @@ class AsyncX:
 
             except httpx.HTTPStatusError as e:
                 print(Fore.RED + f"[Error] HTTP {e.response.status_code}: {e.response.text}")
+                wait_time = max(0, reset_time - time.time())
+                yield {'limit': limit, 'remaining': remaining, 'reset_time': stringTime, 'wait_time': wait_time}
                 break
             except Exception as e:
                 print(Fore.RED + f"[Error] Request failed: {e}")
@@ -177,6 +181,37 @@ class AsyncX:
         async for followers_batch in self._query_paginated(Operation.Followers, userId=rest_id):
             yield followers_batch
 
+    async def check_followers_rate_limit(self, rest_id: str) -> bool:
+        """
+        Fetches the first page of followers to check if the account is rate-limited.
+
+        @param rest_id: The Twitter user ID
+        @return: True if request succeeds, False if 429 is received.
+        """
+        print(Fore.YELLOW + "🔍 Checking rate limit with a test request...")
+
+        try:
+            # ✅ Fetch the first page of followers
+            data = await self._query(Operation.Followers, userId=rest_id)
+
+            if data:  # ✅ Successfully retrieved data
+                print(Fore.GREEN + "✅ Account is NOT rate-limited. Good to use!")
+                return True
+            else:
+                print(Fore.RED + "❌ Account might be rate-limited or returned invalid data.")
+                return False
+
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 429:
+                print(Fore.RED + "⛔ 429 Rate Limit detected. This account cannot be used.")
+                return False
+            else:
+                print(Fore.RED + f"[Error] HTTP {e.response.status_code}: {e.response.text}")
+                return False
+
+        except Exception as e:
+            print(Fore.RED + f"[Error] Failed to check rate limit: {e}")
+            return False
 
 
     async def close(self):

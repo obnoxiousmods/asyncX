@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Twitter Follower Scraper</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+    <h2>Live Twitter Follower Scraper</h2>
+
+    <div class="input-container">
+        <input type="text" id="username" placeholder="Enter Twitter username">
+        <button id="startButton">Start Scraping</button>
+    </div>
+
+    <div class="output-container">
+        <div class="textbox-wrapper">
+            <label>📋 Progress Log</label>
+            <textarea id="progressLog" readonly placeholder="Progress updates will appear here..."></textarea>
+        </div>
+
+        <div class="textbox-wrapper">
+            <label>🧑‍🤝‍🧑 Followers List</label>
+            <textarea id="followersList" readonly placeholder="Follower rest_ids will appear here..."></textarea>
+        </div>
+    </div>
+
+<div class="account-import">
+    <label>📥 Import Twitter Accounts (auth_token|kdt|ct0 per line)</label>
+    <textarea id="accountInput" placeholder="Paste accounts here..."></textarea>
+    <button id="importButton">📤 Import Accounts</button>
+</div>
+
+
+    <button id="downloadButton">📥 Download Followers</button>
+
+    <script src="{{ url_for('static', path='/app.js') }}"></script>
+</body>
+</html>

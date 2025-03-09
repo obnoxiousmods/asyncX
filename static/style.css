@@ -1,0 +1,135 @@
+/* Dracula Theme */
+:root {
+    --background: #282a36;
+    --current-line: #44475a;
+    --foreground: #f8f8f2;
+    --comment: #6272a4;
+    --cyan: #8be9fd;
+    --green: #50fa7b;
+    --orange: #ffb86c;
+    --pink: #ff79c6;
+    --purple: #bd93f9;
+    --red: #ff5555;
+    --yellow: #f1fa8c;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: var(--background);
+    color: var(--foreground);
+    margin: 50px;
+}
+
+h2 {
+    color: var(--pink);
+}
+
+.input-container {
+    margin-bottom: 20px;
+}
+
+input {
+    padding: 8px;
+    width: 250px;
+    background-color: var(--current-line);
+    border: 1px solid var(--foreground);
+    color: var(--foreground);
+}
+
+button {
+    padding: 8px 15px;
+    cursor: pointer;
+    background-color: var(--purple);
+    border: none;
+    color: var(--foreground);
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: var(--pink);
+}
+
+.output-container {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.textbox-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 45%;
+}
+
+label {
+    font-weight: bold;
+    color: var(--yellow);
+    margin-bottom: 5px;
+}
+
+textarea {
+    width: 100%;
+    height: 250px;
+    padding: 10px;
+    font-size: 14px;
+    background-color: var(--current-line);
+    color: var(--foreground);
+    border: 1px solid var(--foreground);
+    resize: none;
+}
+
+#downloadButton {
+    margin-top: 20px;
+    padding: 10px 15px;
+    font-size: 16px;
+}
+
+
+/* ✅ Account Import Box */
+.account-import {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--current-line);
+    border: 1px solid var(--foreground);
+    border-radius: 8px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.account-import label {
+    font-weight: bold;
+    color: var(--yellow);
+    display: block;
+    margin-bottom: 5px;
+}
+
+#accountInput {
+    width: 90%;
+    height: 100px;
+    padding: 10px;
+    font-size: 14px;
+    background-color: var(--background);
+    color: var(--foreground);
+    border: 1px solid var(--foreground);
+    resize: none;
+    border-radius: 5px;
+}
+
+#importButton {
+    margin-top: 10px;
+    padding: 10px 15px;
+    font-size: 14px;
+    background-color: var(--green);
+    border: none;
+    color: var(--background);
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+#importButton:hover {
+    background-color: var(--cyan);
+}
